@@ -38,7 +38,7 @@ void mergeList(char ** ql, int row1, int row2, int *maxRow) {
     }
     if (row2 == *maxRow) {
         free(ql[row2]);
-        ql[row2] = 0;
+        ql[row2] = NULL;
         (*maxRow)--;
         return;
     }
@@ -62,8 +62,8 @@ void save2list(char *eq, char ** ql, int *maxRow) {
         idx2 = getListIdx(ql, *maxRow, eq[3]);
         if (idx2 < 0) {
             (*maxRow)++;
-            ql[*maxRow] = malloc(26);
-            memset(ql[*maxRow], 26, 0);
+            ql[*maxRow] = malloc(27);
+            memset(ql[*maxRow], 0, 27);
             ql[*maxRow][eq[0] - 'a'] = eq[0];
             ql[*maxRow][eq[3] - 'a'] = eq[3];
         } else {
@@ -87,40 +87,97 @@ bool equationsPossible(char ** equations, int equationsSize){
     char *nel[maxRow];
     int nelRowNum = -1;
 
-    memset(eql, maxRow, 0);
-    memset(eql, maxRow, 0);
+    memset(eql, 0, sizeof(eql));
+    memset(nel, 0, sizeof(nel));
     int idx1;
     int idx2;
+
+    // save
     for (int i=0; i<equationsSize; i++) {
         if (equations[i][1] == '=') {
-            idx1 = getListIdx(nel, nelRowNum, equations[i][0]);
-            idx2 = getListIdx(nel, nelRowNum, equations[i][3]);
-            if (idx1 >= 0 && idx2 >= 0) {
-                return false;
-            }
             save2list(equations[i], eql, &eqlRowNum);
         } else {
-            idx1 = getListIdx(eql, eqlRowNum, equations[i][0]);
-            idx2 = getListIdx(eql, eqlRowNum, equations[i][3]);
-            if (idx1 >= 0 && idx2 >= 0) {
+            if (equations[i][0] == equations[i][3]) {
                 return false;
             }
             save2list(equations[i], nel, &nelRowNum);
         }
     }
+
+    // check
+    for (int i=0; i<equationsSize; i++) {
+        if (equations[i][1] == '=') {
+            if (equations[i][0] == equations[i][3]) {
+                continue;
+            }
+            idx1 = getListIdx(nel, nelRowNum, equations[i][0]);
+            idx2 = getListIdx(nel, nelRowNum, equations[i][3]);
+            if (idx1 == idx2 && idx1 >= 0 && idx2 >= 0) {
+                return false;
+            }
+        } else {
+            idx1 = getListIdx(eql, eqlRowNum, equations[i][0]);
+            idx2 = getListIdx(eql, eqlRowNum, equations[i][3]);
+            if (idx1 == idx2 && idx1 >= 0 && idx2 >= 0) {
+                return false;
+            }
+        }
+    }
     return true;
 }
 
-void main(void)
+int main(void)
 {
     bool res;
-    char *equations[] = {
+    char *equations[10] = {
         "a==b",
         "b!=a"
     };
 
-    res = equationsPossible(equations, sizeof(equations)/8);
-    printf("res is %d, except is 0\n", res);
-        
-    return;
+    res = equationsPossible(equations, 2);
+    printf("case1: res is %d, except is 0\n", res);
+
+    equations[0] = "a==b";
+    equations[1] = "b!=c";
+    equations[2] = "c==a";
+    res = equationsPossible(equations, 3);
+    printf("case2: res is %d, except is 0\n", res);
+
+    equations[0] = "a!=a";
+    res = equationsPossible(equations, 1);
+    printf("case3: res is %d, except is 0\n", res);
+
+    equations[0] = "c==c";
+    equations[1] = "b==d";
+    equations[2] = "x!=z";
+    res = equationsPossible(equations, 3);
+    printf("case4: res is %d, except is 1\n", res);
+
+    equations[0] = "a==b";
+    equations[1] = "e==c";
+    equations[2] = "b==c";
+    equations[3] = "a!=e";
+    res = equationsPossible(equations, 4);
+    printf("case5: res is %d, except is 0\n", res);
+
+    equations[0] = "e==e";
+    equations[1] = "d!=e";
+    equations[2] = "c==d";
+    equations[3] = "d!=e";
+    res = equationsPossible(equations, 4);
+    printf("case6: res is %d, except is 1\n", res);
+
+    equations[0] = "a!=i";
+    equations[1] = "g==k";
+    equations[2] = "k==j";
+    equations[3] = "k!=i";
+    equations[4] = "c!=e";
+    equations[5] = "a!=e";
+    equations[6] = "k!=a";
+    equations[7] = "a!=g";
+    equations[8] = "g!=c";
+    res = equationsPossible(equations, 9);
+    printf("case7: res is %d, except is 1\n", res);
+
+    return 0;
 }
