@@ -1,8 +1,18 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef enum
+{
+    true=1,
+    false=0
+}bool;
+
 int getListIdx(char ** ql, int rowNum, char c) {
     if (rowNum < 0) {
         return -1;
     }
-    for (int i=0; i < rowNum; i++) {
+    for (int i=0; i <= rowNum; i++) {
         if (ql[i][c-'a'] == c) {
             return i;
         }
@@ -64,7 +74,7 @@ void save2list(char *eq, char ** ql, int *maxRow) {
         if (idx2 < 0) {
             ql[idx1][eq[3] - 'a'] = eq[3];
         } else {
-            mergeList(ql, idx1, idx2, *maxRow);
+            mergeList(ql, idx1, idx2, maxRow);
         }
     }
     return;
@@ -90,8 +100,8 @@ bool equationsPossible(char ** equations, int equationsSize){
             }
             save2list(equations[i], eql, &eqlRowNum);
         } else {
-            idx1 = getListIdx(eql, nelRowNum, equations[i][0]);
-            idx2 = getListIdx(eql, nelRowNum, equations[i][3]);
+            idx1 = getListIdx(eql, eqlRowNum, equations[i][0]);
+            idx2 = getListIdx(eql, eqlRowNum, equations[i][3]);
             if (idx1 >= 0 && idx2 >= 0) {
                 return false;
             }
@@ -99,4 +109,18 @@ bool equationsPossible(char ** equations, int equationsSize){
         }
     }
     return true;
+}
+
+void main(void)
+{
+    bool res;
+    char *equations[] = {
+        "a==b",
+        "b!=a"
+    };
+
+    res = equationsPossible(equations, sizeof(equations)/8);
+    printf("res is %d, except is 0\n", res);
+        
+    return;
 }
