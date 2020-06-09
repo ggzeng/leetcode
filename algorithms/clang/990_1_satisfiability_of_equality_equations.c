@@ -1,3 +1,14 @@
+/**
+ * 解题思路：把每个等式链(a=b=c=...)存放到一个数组中，如果有多个
+ * 不相关的等式链那么就有多个数组。然后在检查不等式，如果不等式
+ * 两边的数在一个链表中那么就返回false。
+ * 解题过程：虽然有“链”的关系，但是由于a~z范围较小，一开始想到的就是用
+ * 数组保存和查找而非链表。但是刚开始题目理解有问题，把不等式也当做
+ * 一个"链"来处理了。不等式是不能传递的，a!=b,b!=c，并不能说明a!=c。
+ * 另外由于说到表达式的个数不会超过500个，所以一开始就申请了两个
+ * (一个等式，一个不等式，其实不等式是不需要保存的) 500*26 的数组，运行
+ * 过程中提示了内存问题。后来改成动态申请26个字符的内存。
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -84,11 +95,8 @@ bool equationsPossible(char ** equations, int equationsSize){
     int maxRow = equationsSize;
     char *eql[maxRow];
     int eqlRowNum = -1;
-    char *nel[maxRow];
-    int nelRowNum = -1;
 
     memset(eql, 0, sizeof(eql));
-    memset(nel, 0, sizeof(nel));
     int idx1;
     int idx2;
 
@@ -96,26 +104,15 @@ bool equationsPossible(char ** equations, int equationsSize){
     for (int i=0; i<equationsSize; i++) {
         if (equations[i][1] == '=') {
             save2list(equations[i], eql, &eqlRowNum);
-        } else {
-            if (equations[i][0] == equations[i][3]) {
-                return false;
-            }
-            save2list(equations[i], nel, &nelRowNum);
         }
     }
 
     // check
     for (int i=0; i<equationsSize; i++) {
-        if (equations[i][1] == '=') {
+        if (equations[i][1] == '!') {
             if (equations[i][0] == equations[i][3]) {
-                continue;
-            }
-            idx1 = getListIdx(nel, nelRowNum, equations[i][0]);
-            idx2 = getListIdx(nel, nelRowNum, equations[i][3]);
-            if (idx1 == idx2 && idx1 >= 0 && idx2 >= 0) {
                 return false;
             }
-        } else {
             idx1 = getListIdx(eql, eqlRowNum, equations[i][0]);
             idx2 = getListIdx(eql, eqlRowNum, equations[i][3]);
             if (idx1 == idx2 && idx1 >= 0 && idx2 >= 0) {
